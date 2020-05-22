@@ -38,7 +38,7 @@ class StartActivity : AppCompatActivity() {
         binding.textViewVersion.visibility = View.VISIBLE
         binding.textViewPoweredLabel.visibility = View.VISIBLE
 
-        Handler().postDelayed(Runnable {
+        Handler().postDelayed({
             startActivity(Intent(this,MainActivity::class.java))
             finish()
         },1500)
