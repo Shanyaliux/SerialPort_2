@@ -63,7 +63,7 @@ class StartActivity : AppCompatActivity() {
                 REQUEST_PERMISSION
             )
         }else {//全部权限已申请
-            Toast.makeText(this,"已获取所需权限", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this,this.getString(R.string.required_permissions), Toast.LENGTH_SHORT).show()
 
             Handler().postDelayed({
                 startActivity(Intent(this,MainActivity::class.java))
@@ -83,7 +83,7 @@ class StartActivity : AppCompatActivity() {
             REQUEST_PERMISSION -> {
                 for (element in grantResults) {
                     if (element != PackageManager.PERMISSION_GRANTED) {
-                        Toast.makeText(this, "有权限未获取，可能会影响使用", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, this.getString(R.string.unauthorized_access), Toast.LENGTH_SHORT).show()
                     } else {
                         Handler().postDelayed({
                             startActivity(Intent(this, MainActivity::class.java))

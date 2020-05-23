@@ -1,13 +1,16 @@
 package com.shanya.serialport
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ejlchina.okhttps.HTTP
 import com.google.gson.Gson
 import com.shanya.serialport.update.VersionInfo
+import kotlinx.coroutines.launch
 
 
 class MyViewModel: ViewModel() {
@@ -20,13 +23,20 @@ class MyViewModel: ViewModel() {
 
     private var versionInfo = VersionInfo(0,"","","","")
 
-    private var hasUpdate = false
+    private val _hasUpdateLiveData = MutableLiveData<Boolean>()
+    val hasUpdateLiveData:LiveData<Boolean>
+    get() = _hasUpdateLiveData
+
+    private val _downloadProcessLiveData = MutableLiveData<Double>()
+    val downloadProcessLiveData:LiveData<Double>
+    get() = _downloadProcessLiveData
+
 
     val scanStatusLiveData = MutableLiveData<Boolean>()
 
-
     init {
         scanStatusLiveData.value = false
+        _downloadProcessLiveData.value = 0.0
         checkForUpdate()
     }
 
@@ -35,7 +45,9 @@ class MyViewModel: ViewModel() {
             .setOnResponse {
                 versionInfo = Gson().fromJson(it.body.toString(),VersionInfo::class.java)
 
-                hasUpdate = BuildConfig.VERSION_CODE < versionInfo.versionCode
+                viewModelScope.launch {
+                    _hasUpdateLiveData.value = BuildConfig.VERSION_CODE < versionInfo.versionCode
+                }
             }
             .setOnException {
                 Log.e(tag,it.toString())
@@ -46,7 +58,24 @@ class MyViewModel: ViewModel() {
             .get()
     }
 
+    fun download(path:String){
+        http.async(versionInfo.downloadUrl)
+            .setOnResponse {
+                it.body
+                    .stepRate(0.01)
+                    .setOnProcess {process ->
+                        viewModelScope.launch {
+                            _downloadProcessLiveData.value = process.rate
+                        }
+                    }
+                    .toFile(path + versionInfo.fileName)
+                    .start()
+            }
+            .setOnException {  }
+            .setOnComplete {  }
+            .get()
+    }
+
     fun getVersionInfo() = versionInfo
-    fun getHasUpdate() = hasUpdate
 
 }

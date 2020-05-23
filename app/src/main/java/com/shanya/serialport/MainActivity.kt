@@ -1,15 +1,22 @@
 package com.shanya.serialport
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.FileProvider
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -22,14 +29,19 @@ import com.google.android.material.navigation.NavigationView
 import com.shanya.serialport.databinding.ActivityMainBinding
 import com.shanya.serialportutil.SerialPortUtil
 import com.shanya.serialportutil.SerialPortUtil.*
+import kotlinx.android.synthetic.main.download_process.view.*
 import kotlinx.android.synthetic.main.search_devices.view.*
+import java.io.File
 
+const val REQUEST_INSTALL_PERMISSION = 0x664
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var serialPortUtil: SerialPortUtil
     private lateinit var myViewModel: MyViewModel
+    private var downloadProgressBar:ProgressBar ?= null
+    private var downloadDialog:AlertDialog ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,8 +69,98 @@ class MainActivity : AppCompatActivity() {
                 override fun onReceivedData(data: String?) {
                     TODO("Not yet implemented")
                 }
-
             })
+
+        myViewModel.hasUpdateLiveData.observe(this,hasUpdateObserver)
+    }
+
+    private val hasUpdateObserver = Observer<Boolean> {
+        val builder: AlertDialog.Builder =
+            AlertDialog.Builder(this)
+                .setTitle(this.getString(R.string.new_version_found))
+                .setMessage(myViewModel.getVersionInfo().updateContent)
+                .setPositiveButton(this.getString(R.string.download_immediately)) { _, _ ->
+
+                    myViewModel.hasUpdateLiveData.removeObservers(this)
+
+                    myViewModel.download(this.externalCacheDir.toString() + File.separator)
+
+                    val layoutInflater = LayoutInflater.from(this)
+                    val downloadView = layoutInflater.inflate(R.layout.download_process,null)
+                    val downloadBuilder: AlertDialog.Builder = AlertDialog.Builder(this)
+                        .setTitle(this.getString(R.string.downloading))
+                        .setView(downloadView)
+                    downloadDialog = downloadBuilder.create()
+                    downloadDialog?.setCancelable(false)
+                    downloadDialog?.show()
+                    downloadProgressBar = downloadView.progressBarDownload
+                    myViewModel.downloadProcessLiveData.observe(this, downloadProcessObserver)
+                }
+                .setNegativeButton(this.getString(R.string.next_time)) { _, _ ->
+                    myViewModel.hasUpdateLiveData.removeObservers(this)
+                }
+        builder.show()
+
+    }
+
+    private val downloadProcessObserver = Observer<Double> {
+        downloadProgressBar?.progressBarDownload?.progress = (it * 100).toInt()
+        if (it >= 1) {
+            downloadDialog?.cancel()
+            myViewModel.downloadProcessLiveData.removeObservers(this)
+            installDialog(this.externalCacheDir.toString() + File.separator + myViewModel.getVersionInfo().fileName)
+        }
+
+    }
+
+    private fun installDialog(path: String){
+        val builder: android.app.AlertDialog.Builder =
+            android.app.AlertDialog.Builder(this)
+                .setTitle(this.getString(R.string.tips))
+                .setMessage(this.getString(R.string.install_dialog_message) + " “$path”")
+                .setPositiveButton(this.getString(R.string.install_now)){_,_->
+                    checkInstallPermission()
+                    installApk(path)
+                }
+                .setNegativeButton(this.getString(R.string.install_after)){_,_->
+
+                }
+        builder.show()
+    }
+
+    private fun installApk(path: String){
+        val apk = File(path)
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            val uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileProvider", apk)
+            intent.setDataAndType(uri, "application/vnd.android.package-archive")
+        }else{
+            intent.setDataAndType(Uri.fromFile(apk),"application/vnd.android.package-archive")
+        }
+        startActivity(intent)
+    }
+
+    private fun checkInstallPermission(){
+        val intent = Intent()
+        val packageUri = Uri.parse("package:" + this.packageName)
+        intent.data = packageUri
+        if (Build.VERSION.SDK_INT >= 26){
+            if (!packageManager.canRequestPackageInstalls()){
+                intent.action = Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES
+                startActivityForResult(intent, REQUEST_INSTALL_PERMISSION)
+                Toast.makeText(this,this.getString(R.string.unknown_source_permissions),Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_INSTALL_PERMISSION){
+            installDialog(this.externalCacheDir.toString() + File.separator + myViewModel.getVersionInfo().fileName)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -100,8 +202,6 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.menuCheckUpdate -> {
                 myViewModel.checkForUpdate()
-
-                Toast.makeText(this,myViewModel.getHasUpdate().toString(),Toast.LENGTH_SHORT).show()
             }
         }
         return super.onOptionsItemSelected(item)

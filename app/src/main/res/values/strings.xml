@@ -1,18 +1,30 @@
 <resources>
     <string name="app_name">SerialPort</string>
-    <string name="start_label_left">Serial</string>
-    <string name="start_label_right">Port</string>
-    <string name="version_label">Version:</string>
-    <string name="start_powered_label">Powered by Shanya</string>
+    <string name="start_label_left" translatable="false">Serial</string>
+    <string name="start_label_right" translatable="false">Port</string>
+    <string name="version_label" translatable="false">Version:</string>
+    <string name="start_powered_label" translatable="false">Powered by Shanya</string>
     <string name="drawer_menu_support_dev">Support development</string>
     <string name="drawer_menu_about">About</string>
     <string name="drawer_menu_home">Home</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+
     <string name="paired_devices">Paired devices</string>
     <string name="unpaired_devices">Unpaired devices</string>
     <string name="button_scan">Scan</string>
     <string name="menu_connect">Connect</string>
     <string name="menu_check_update">Check for update</string>
+    <string name="new_version_found">New version found</string>
+    <string name="download_immediately">Download immediately</string>
+    <string name="downloading">Downloading</string>
+    <string name="next_time">Next time</string>
+    <string name="tips">Tips</string>
+    <string name="install_dialog_message">After the download is complete, whether to install immediately, if the installation file is stored in \n</string>
+    <string name="install_now">Install now</string>
+    <string name="install_after">Install after</string>
+    <string name="unknown_source_permissions">Please turn on unknown source permissions</string>
+    <string name="required_permissions">The required permissions have been obtained</string>
+    <string name="unauthorized_access">Unauthorized access may affect use</string>
 </resources>
