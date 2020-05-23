@@ -41,12 +41,8 @@ class CommunicationFragment : Fragment() {
             }
 
             override fun onReceivedData(data: String?) {
-                MainScope().launch {
-                    myViewModel.infoList.add(Info(MSG_RECE_TYPE, data.toString()))
-                    myViewModel.updateInfoList()
-                }
+                TODO("Not yet implemented")
             }
-
         })
         val infoAdapter = InfoAdapter(requireActivity())
         infoRecyclerView.apply {

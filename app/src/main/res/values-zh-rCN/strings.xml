@@ -22,4 +22,5 @@
     <string name="unauthorized_access">有权限未获取，可能会影响使用</string>
     <string name="send_button">发送</string>
     <string name="send_hint">请输入...</string>
+    <string name="switch_text">编辑模式</string>
 </resources>
