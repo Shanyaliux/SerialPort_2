@@ -2,10 +2,13 @@ package com.shanya.serialport
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Message
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.Menu
@@ -31,7 +34,10 @@ import com.shanya.serialportutil.SerialPortUtil
 import com.shanya.serialportutil.SerialPortUtil.*
 import kotlinx.android.synthetic.main.download_process.view.*
 import kotlinx.android.synthetic.main.search_devices.view.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.StringReader
 
 const val REQUEST_INSTALL_PERMISSION = 0x664
 class MainActivity : AppCompatActivity() {
@@ -67,7 +73,10 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 override fun onReceivedData(data: String?) {
-                    TODO("Not yet implemented")
+                    MainScope().launch {
+                        myViewModel.infoList.add(Info(MSG_RECE_TYPE, data.toString()))
+                        myViewModel.updateInfoList()
+                    }
                 }
             })
 
@@ -207,3 +216,4 @@ class MainActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 }
+

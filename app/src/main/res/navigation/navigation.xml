@@ -8,16 +8,16 @@
     <fragment
         android:id="@+id/nav_support"
         android:name="com.shanya.serialport.drawerFragment.SupportFragment"
-        android:label="fragment_support"
+        android:label="@string/drawer_menu_support_dev"
         tools:layout="@layout/fragment_support" />
     <fragment
         android:id="@+id/nav_about"
         android:name="com.shanya.serialport.drawerFragment.AboutFragment"
-        android:label="fragment_about"
+        android:label="@string/drawer_menu_about"
         tools:layout="@layout/fragment_about" />
     <fragment
         android:id="@+id/nav_home"
         android:name="com.shanya.serialport.drawerFragment.HomeFragment"
-        android:label="fragment_home"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_home" />
 </navigation>

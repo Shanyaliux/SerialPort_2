@@ -1,17 +1,11 @@
 package com.shanya.serialport
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.ejlchina.okhttps.HTTP
 import com.google.gson.Gson
 import com.shanya.serialport.update.VersionInfo
 import kotlinx.coroutines.launch
-
 
 class MyViewModel: ViewModel() {
 
@@ -31,13 +25,23 @@ class MyViewModel: ViewModel() {
     val downloadProcessLiveData:LiveData<Double>
     get() = _downloadProcessLiveData
 
+    private val _infoLiveData = MutableLiveData<MutableList<Info>>()
+    val infoLiveData: LiveData<MutableList<Info>>
+    get() = _infoLiveData
+
+    val infoList: MutableList<Info> = emptyList<Info>().toMutableList()
 
     val scanStatusLiveData = MutableLiveData<Boolean>()
 
     init {
         scanStatusLiveData.value = false
         _downloadProcessLiveData.value = 0.0
+        _infoLiveData.value = infoList
         checkForUpdate()
+    }
+
+    fun updateInfoList(){
+        _infoLiveData.value = infoList
     }
 
     fun checkForUpdate(){

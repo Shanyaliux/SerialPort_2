@@ -27,4 +27,6 @@
     <string name="unknown_source_permissions">Please turn on unknown source permissions</string>
     <string name="required_permissions">The required permissions have been obtained</string>
     <string name="unauthorized_access">Unauthorized access may affect use</string>
+    <string name="send_button">Send</string>
+    <string name="send_hint">Please enter...</string>
 </resources>

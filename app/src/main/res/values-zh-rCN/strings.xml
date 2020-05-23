@@ -14,10 +14,12 @@
     <string name="downloading">正在下载</string>
     <string name="next_time">下次再说</string>
     <string name="tips">提示</string>
-    <string name="install_dialog_message">下载完成，是否立即安装\\n若之后安装，文件存于\\n</string>
+    <string name="install_dialog_message">下载完成，是否立即安装\n若之后安装，文件存于\n</string>
     <string name="install_now">立即安装</string>
     <string name="install_after">之后安装</string>
     <string name="unknown_source_permissions">请打开位置2来源权限</string>
     <string name="required_permissions">以获取所需权限</string>
     <string name="unauthorized_access">有权限未获取，可能会影响使用</string>
+    <string name="send_button">发送</string>
+    <string name="send_hint">请输入...</string>
 </resources>
