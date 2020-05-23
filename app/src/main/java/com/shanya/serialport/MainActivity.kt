@@ -1,13 +1,18 @@
 package com.shanya.serialport
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -16,6 +21,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.shanya.serialport.databinding.ActivityMainBinding
 import com.shanya.serialportutil.SerialPortUtil
+import com.shanya.serialportutil.SerialPortUtil.*
 import kotlinx.android.synthetic.main.search_devices.view.*
 
 class MainActivity : AppCompatActivity() {
@@ -23,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var serialPortUtil: SerialPortUtil
+    private lateinit var myViewModel: MyViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -40,8 +48,17 @@ class MainActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
-        serialPortUtil = SerialPortUtil.getInstance(this) { data -> println(data) }
+        myViewModel = ViewModelProvider(this).get(MyViewModel::class.java)
+        serialPortUtil = getInstance(this, object : OnSerialPortListener{
+                override fun onScanStatus(status: Boolean) {
+                    myViewModel.scanStatusLiveData.value = status
+                }
 
+                override fun onReceivedData(data: String?) {
+                    TODO("Not yet implemented")
+                }
+
+            })
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -54,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+    @SuppressLint("InflateParams")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
             R.id.menuConnect -> {
@@ -70,12 +88,20 @@ class MainActivity : AppCompatActivity() {
 
                 dialogView.buttonScan.setOnClickListener {
                     serialPortUtil.doDiscovery()
+                    myViewModel.scanStatusLiveData.observe(this, Observer {
+                        if (it){
+                            dialogView.progressBarScan.visibility = View.VISIBLE
+                        }else{
+                            dialogView.progressBarScan.visibility = View.GONE
+                        }
+                    })
                 }
-
                 builder.show()
             }
             R.id.menuCheckUpdate -> {
+                myViewModel.checkForUpdate()
 
+                Toast.makeText(this,myViewModel.getHasUpdate().toString(),Toast.LENGTH_SHORT).show()
             }
         }
         return super.onOptionsItemSelected(item)
