@@ -67,6 +67,11 @@ class MainActivity : AppCompatActivity() {
                 dialogView.listViewUnpairedDevices.onItemClickListener = serialPortUtil.devicesClickListener
                 dialogView.listViewPairedDevices.adapter = serialPortUtil.pairedDevicesArrayAdapter
                 dialogView.listViewUnpairedDevices.adapter = serialPortUtil.unPairedDevicesArrayAdapter
+
+                dialogView.buttonScan.setOnClickListener {
+                    serialPortUtil.doDiscovery()
+                }
+
                 builder.show()
             }
             R.id.menuCheckUpdate -> {
