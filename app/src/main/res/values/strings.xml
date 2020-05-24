@@ -30,4 +30,5 @@
     <string name="send_button">Send</string>
     <string name="send_hint">Please enter…</string>
     <string name="switch_text">Edit case</string>
+    <string name="please_use_horizontally">Please use horizontally</string>
 </resources>

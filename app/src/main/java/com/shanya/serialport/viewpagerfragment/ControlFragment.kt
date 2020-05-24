@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.text.Editable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -97,7 +98,7 @@ class ControlFragment : Fragment() {
         editorData.apply()
     }
 
-    inner class ButtonListener: View.OnClickListener {
+    inner class ButtonListener: View.OnClickListener,View.OnTouchListener {
 
         override fun onClick(v: View?) {
             if (switchControl.isChecked){
@@ -108,6 +109,10 @@ class ControlFragment : Fragment() {
                 myViewModel.infoList.add(Info(MSG_SEND_TYPE,data.toString()))
                 myViewModel.updateInfoList()
             }
+        }
+
+        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+            TODO("Not yet implemented")
         }
     }
 }
