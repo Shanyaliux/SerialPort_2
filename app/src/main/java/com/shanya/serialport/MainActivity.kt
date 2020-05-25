@@ -108,7 +108,10 @@ class MainActivity : AppCompatActivity() {
                 .setNegativeButton(this.getString(R.string.next_time)) { _, _ ->
                     myViewModel.hasUpdateLiveData.removeObservers(this)
                 }
-        builder.show()
+        if (myViewModel.hasUpdateLiveData.value!!){
+            builder.show()
+        }
+
 
     }
 

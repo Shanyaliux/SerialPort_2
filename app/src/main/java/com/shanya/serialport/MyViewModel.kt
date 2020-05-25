@@ -36,6 +36,7 @@ class MyViewModel: ViewModel() {
 
     init {
         scanStatusLiveData.value = false
+        _hasUpdateLiveData.value = false
         _downloadProcessLiveData.value = 0.0
         _infoLiveData.value = infoList
         checkForUpdate()
