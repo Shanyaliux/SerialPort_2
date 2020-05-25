@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.ejlchina.okhttps.HTTP
 import com.google.gson.Gson
 import com.shanya.serialport.update.VersionInfo
+import com.shanya.serialportutil.SerialPortUtil
 import kotlinx.coroutines.launch
 
 class MyViewModel: ViewModel() {
@@ -81,5 +82,5 @@ class MyViewModel: ViewModel() {
     }
 
     fun getVersionInfo() = versionInfo
-
 }
+

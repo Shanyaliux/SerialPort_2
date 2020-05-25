@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import androidx.lifecycle.ViewModelProvider
 import com.shanya.serialport.Info
 import com.shanya.serialport.MSG_SEND_TYPE
@@ -20,8 +19,9 @@ import com.shanya.serialport.MyViewModel
 import com.shanya.serialport.R
 import com.shanya.serialportutil.SerialPortUtil
 import kotlinx.android.synthetic.main.button_info_dialog.view.*
-import kotlinx.android.synthetic.main.fragment_communication.*
 import kotlinx.android.synthetic.main.fragment_control.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 /**
  * A simple [Fragment] subclass.
@@ -29,6 +29,9 @@ import kotlinx.android.synthetic.main.fragment_control.*
 const val CONTROL_BUTTON_DATA = "control_button_data"
 const val CONTROL_BUTTON_NAME = "control_button_name"
 class ControlFragment : Fragment() {
+
+    private var startSendFlag = false
+    private var sendData = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,7 +43,10 @@ class ControlFragment : Fragment() {
 
     private lateinit var serialPortUtil: SerialPortUtil
     private lateinit var sharedPreferencesDataSend: SharedPreferences
+    private lateinit var sharedPreferencesName: SharedPreferences
     private lateinit var myViewModel: MyViewModel
+    private lateinit var controlSendThread: ControlSendThread
+    private val sendDatas = HashMap<Int,String>()
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -62,17 +68,21 @@ class ControlFragment : Fragment() {
         val buttonListener = ButtonListener()
         sharedPreferencesDataSend = requireActivity().getSharedPreferences(CONTROL_BUTTON_DATA,
             Context.MODE_PRIVATE)
-        val sharedPreferences = requireActivity().getSharedPreferences(CONTROL_BUTTON_NAME,Context.MODE_PRIVATE)
+        sharedPreferencesName = requireActivity().getSharedPreferences(CONTROL_BUTTON_NAME,Context.MODE_PRIVATE)
 
         for (button in buttons){
-            button.text = sharedPreferences.getString(button.id.toString(),"")
+            button.text = sharedPreferencesName.getString(button.id.toString(),"")
+            sendDatas[button.id] = sharedPreferencesDataSend.getString(button.id.toString(),"").toString()
             button.setOnClickListener(buttonListener)
+            button.setOnTouchListener(buttonListener)
         }
     }
 
     private fun createDialog(button:Button){
         val layoutInflater = LayoutInflater.from(requireActivity())
         val dialogView = layoutInflater.inflate(R.layout.button_info_dialog,null)
+        dialogView.editTextButtonName.text = Editable.Factory.getInstance().newEditable(sharedPreferencesName.getString(button.id.toString(),""))
+        dialogView.editTextButtonData.text = Editable.Factory.getInstance().newEditable(sharedPreferencesDataSend.getString(button.id.toString(),""))
         val builder = AlertDialog.Builder(requireActivity())
             .setView(dialogView)
             .setPositiveButton("Yes"){_,_ ->
@@ -103,16 +113,45 @@ class ControlFragment : Fragment() {
         override fun onClick(v: View?) {
             if (switchControl.isChecked){
                 createDialog(v as Button)
-            }else{
-                val data = sharedPreferencesDataSend.getString(v?.id.toString(),"")
-                serialPortUtil.sendData(data)
-                myViewModel.infoList.add(Info(MSG_SEND_TYPE,data.toString()))
-                myViewModel.updateInfoList()
             }
         }
 
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-            TODO("Not yet implemented")
+            when(event?.action){
+                MotionEvent.ACTION_DOWN -> {
+                    controlSendThread = ControlSendThread(serialPortUtil)
+                    sendData = sendDatas[v?.id].toString()
+                    startSendFlag = true
+                    controlSendThread.start()
+                    return false
+                }
+                MotionEvent.ACTION_UP -> {
+                    sendData = "0"
+                    startSendFlag = false
+                    return false
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    sendData = "0"
+                    startSendFlag = false
+                    return false
+                }
+            }
+            return false
+        }
+    }
+
+    inner class ControlSendThread(private val serialPortUtil: SerialPortUtil): Thread(){
+        override fun run() {
+            super.run()
+            while (startSendFlag){
+                sleep(100)
+                println("d")
+                MainScope().launch {
+                    serialPortUtil.sendData(sendData)
+                    myViewModel.infoList.add(Info(MSG_SEND_TYPE,sendData.toString()))
+                    myViewModel.updateInfoList()
+                }
+            }
         }
     }
 }
