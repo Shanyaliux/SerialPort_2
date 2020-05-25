@@ -102,6 +102,8 @@ class ControlFragment : Fragment() {
         val sharedPreferencesData = requireActivity().getSharedPreferences(CONTROL_BUTTON_DATA,Context.MODE_PRIVATE)
         val editorData = sharedPreferencesData.edit()
 
+        sendDatas[button.id] = data
+
         editorName.putString(button.id.toString(),name)
         editorName.apply()
         editorData.putString(button.id.toString(),data)
@@ -117,25 +119,28 @@ class ControlFragment : Fragment() {
         }
 
         override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-            when(event?.action){
-                MotionEvent.ACTION_DOWN -> {
-                    controlSendThread = ControlSendThread(serialPortUtil)
-                    sendData = sendDatas[v?.id].toString()
-                    startSendFlag = true
-                    controlSendThread.start()
-                    return false
-                }
-                MotionEvent.ACTION_UP -> {
-                    sendData = "0"
-                    startSendFlag = false
-                    return false
-                }
-                MotionEvent.ACTION_CANCEL -> {
-                    sendData = "0"
-                    startSendFlag = false
-                    return false
+            if (!switchControl.isChecked){
+                when(event?.action){
+                    MotionEvent.ACTION_DOWN -> {
+                        controlSendThread = ControlSendThread(serialPortUtil)
+                        sendData = sendDatas[v?.id].toString()
+                        startSendFlag = true
+                        controlSendThread.start()
+                        return false
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        sendData = "0"
+                        startSendFlag = false
+                        return false
+                    }
+                    MotionEvent.ACTION_CANCEL -> {
+                        sendData = "0"
+                        startSendFlag = false
+                        return false
+                    }
                 }
             }
+
             return false
         }
     }
@@ -145,10 +150,9 @@ class ControlFragment : Fragment() {
             super.run()
             while (startSendFlag){
                 sleep(100)
-                println("d")
                 MainScope().launch {
                     serialPortUtil.sendData(sendData)
-                    myViewModel.infoList.add(Info(MSG_SEND_TYPE,sendData.toString()))
+                    myViewModel.infoList.add(Info(MSG_SEND_TYPE,sendData))
                     myViewModel.updateInfoList()
                 }
             }
