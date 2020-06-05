@@ -111,8 +111,6 @@ class MainActivity : AppCompatActivity() {
         if (myViewModel.hasUpdateLiveData.value!!){
             builder.show()
         }
-
-
     }
 
     private val downloadProcessObserver = Observer<Double> {

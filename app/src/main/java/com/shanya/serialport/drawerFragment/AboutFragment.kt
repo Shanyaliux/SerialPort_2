@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.shanya.serialport.R
+import kotlinx.android.synthetic.main.fragment_about.*
 
 /**
  * A simple [Fragment] subclass.
@@ -19,6 +20,13 @@ class AboutFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_about, container, false)
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        textViewAboutVersion.text = requireActivity().packageManager
+            .getPackageInfo(requireActivity().packageName,0).versionName
     }
 
 }

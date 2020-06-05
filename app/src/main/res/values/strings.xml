@@ -31,4 +31,11 @@
     <string name="send_hint">Please enter…</string>
     <string name="switch_text">Edit case</string>
     <string name="please_use_horizontally">Please use horizontally</string>
+    <string name="latest_version">Already the latest version</string>
+    <string name="wechat">WeChat</string>
+    <string name="alipay">Alipay</string>
+    <string name="developer">Developer</string>
+    <string name="e_mail">E-mail</string>
+    <string name="home_page">Homepage</string>
+    <string name="my_name">Shanya</string>
 </resources>

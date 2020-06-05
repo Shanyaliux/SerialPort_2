@@ -19,8 +19,8 @@ android {
         applicationId "com.shanya.serialport"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 5
-        versionName "3.0.0"
+        versionCode 6
+        versionName "3.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
